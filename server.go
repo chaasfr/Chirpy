@@ -2,14 +2,17 @@ package main
 
 import "net/http"
 
+	const filepathRoot = "."
+	const port = "8080"
 
 func InitServer() {
-	serverMux := http.NewServeMux()
+	mux := http.NewServeMux()
+	mux.Handle("/",http.FileServer(http.Dir(filepathRoot)))
 
 	var httpServer http.Server
+	httpServer.Handler = mux
+	httpServer.Addr = ":" + port
 
-	httpServer.Handler = serverMux
-	httpServer.Addr = ":8080"
 
 	httpServer.ListenAndServe()
 }
