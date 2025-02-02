@@ -6,10 +6,10 @@ import (
 )
 
 	const filepathRoot = "."
-	const readynessEndpoint = "GET /healthz"
+	const readynessEndpoint = "GET /api/healthz"
 	const fileServerEndpoint = "/app/"
-	const metricsEndpoint = "GET /metrics"
-	const resetMetricsEndpoint ="POST /reset"
+	const metricsEndpoint = "GET /api/metrics"
+	const resetMetricsEndpoint ="POST /api/reset"
 
 	const port = "8080"
 
