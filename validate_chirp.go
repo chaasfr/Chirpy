@@ -29,19 +29,19 @@ func HandlerValidateChirpReq(rw http.ResponseWriter, req *http.Request) {
 	err := decoder.Decode(&input)
 	if err != nil {
 		log.Printf("Error decoding Chirp to valid %s", err)	
-		ReturnGenericJsonError(rw, req)
+		ReturnGenericJsonError(rw)
 		return
 	}
 
 	if len(input.Body) > 140 {
-		ReturnTooLongChirpError(rw, req)
+		ReturnJsonError(rw, 400, "Chirp is too long")
 		return
 	}
 
-	ReturnValidChirp(rw, req, input.Body)
+	ReturnValidChirp(rw, input.Body)
 }
 
-func ReturnValidChirp(rw http.ResponseWriter, req *http.Request, chirp string){
+func ReturnValidChirp(rw http.ResponseWriter, chirp string){
 	badWords := []string {"kerfuffle", "sharbert", "fornax"}
 	chirpSlice := strings.Split(chirp, " ")
 	for i, word := range chirpSlice{
@@ -49,41 +49,6 @@ func ReturnValidChirp(rw http.ResponseWriter, req *http.Request, chirp string){
 			chirpSlice[i] = "****"
 		}
 	}
-
 	outputValid := ValidateChirpOutputValid{true, strings.Join(chirpSlice," ")}
-	dat, err := json.Marshal(outputValid)
-	if err != nil {
-		log.Printf("error marshalling json %s",err)
-		ReturnGenericJsonError(rw, req)
-		return
-	}
-	rw.WriteHeader(200)
-	rw.Write(dat)
-}
-
-
-func ReturnTooLongChirpError(rw http.ResponseWriter, req *http.Request){
-	outputError := GenericJsonError{"Chirp is too long"}
-	dat, err := json.Marshal(outputError)
-	if err != nil {
-		log.Printf("error marshalling json %s",err)
-		rw.WriteHeader(500)
-		return
-	}
-	rw.WriteHeader(400)
-	rw.Header().Set("Content-Type", "application/json")
-	rw.Write(dat)
-}
-
-
-func ReturnGenericJsonError(rw http.ResponseWriter, req *http.Request) {
-	rw.WriteHeader(500)
-	outputError := GenericJsonError{"Something went wrong"}
-	dat, err := json.Marshal(outputError)
-	if err != nil {
-		log.Printf("error marshalling json %s",err)
-		return
-	}
-	rw.Header().Set("Content-Type", "application/json")
-	rw.Write(dat)
+	ReturnWithJSON(rw, 200, outputValid)
 }
