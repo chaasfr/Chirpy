@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -22,13 +21,7 @@ func (cfg *apiConfig)HandlerCreateUser(rw http.ResponseWriter, req *http.Request
 	rw.Header().Add("Content-Type", "text/json")
 
 	input := CreateUserInput{}
-	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&input)
-	if err != nil {
-		log.Printf("Error decoding Create User %s", err)	
-		ReturnGenericJsonError(rw)
-		return
-	}
+	GetInputStruct(&input, rw, req)
 
 	user, err := cfg.dbQueries.CreateUser(req.Context(),input.Email)
 	if err != nil {

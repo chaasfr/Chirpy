@@ -13,11 +13,13 @@ import (
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries *database.Queries
+	platform string
 }
 
 func initConfig() *apiConfig{
 	var cfg apiConfig
 	cfg.dbQueries = initDbConnection()
+	cfg.platform = os.Getenv("PLATFORM")
 	return &cfg
 }
 
@@ -38,4 +40,15 @@ func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 		cfg.fileserverHits.Add(1)
 		next.ServeHTTP(rw, req)
 	})
+}
+
+func (cfg *apiConfig) middlewareDevPlatformOnly(next func (http.ResponseWriter, *http.Request)) func (http.ResponseWriter, *http.Request) {
+	return func(rw http.ResponseWriter, req *http.Request) {
+		if cfg.platform != "dev" {
+			log.Printf("This endpoint is only for dev %s", req.RequestURI)
+			ReturnJsonError(rw, 403, "forbidden outside of dev platform")
+			return
+		}
+		next(rw, req)
+	}
 }

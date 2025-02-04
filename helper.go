@@ -6,6 +6,21 @@ import (
 	"net/http"
 )
 
+type GenericJsonError struct {
+	Error string `json:"error"`
+}
+
+func GetInputStruct(dst interface{}, rw http.ResponseWriter, req *http.Request) {
+	rw.Header().Add("Content-Type", "text/json")
+
+	decoder := json.NewDecoder(req.Body)
+	err := decoder.Decode(dst)
+	if err != nil {
+		log.Printf("error decoding JSON %s", err)
+		ReturnGenericJsonError(rw)
+		return
+	}
+}
 
 func ReturnGenericJsonError(rw http.ResponseWriter) {
 	ReturnJsonError(rw, 500, "something went wrong")
