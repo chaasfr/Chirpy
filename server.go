@@ -13,6 +13,7 @@ const CreateChirpEndpoint = "POST /api/chirps"
 const GetChirpsEndpoint = "GET /api/chirps"
 const GetChirpByIDEndpoint = "GET /api/chirps/{chirpID}"
 const LoginEndpoint = "POST /api/login"
+const RefreshEndpoint = "POST /api/refresh"
 
 const metricsEndpoint = "GET /admin/metrics"
 const resetMetricsEndpoint = "POST /admin/reset"
@@ -32,6 +33,7 @@ func InitServer() {
 	mux.HandleFunc(GetChirpsEndpoint, cfg.HandlerGetChirps)
 	mux.HandleFunc(GetChirpByIDEndpoint, cfg.HandlerGetChirpById)
 	mux.HandleFunc(LoginEndpoint, cfg.HandlerLogin)
+	mux.HandleFunc(RefreshEndpoint, cfg.HandlerRefresh)
 
 	var httpServer http.Server
 	httpServer.Handler = mux

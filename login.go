@@ -60,7 +60,7 @@ func (cfg *apiConfig)HandlerLogin(rw http.ResponseWriter, req *http.Request){
 	}
 
 	createRefreshTokenQp := database.CreateRefreshTokenParams{
-		Token:  token,
+		Token:  refreshToken,
 		UserID: userDb.ID,
 	}
 	_, err = cfg.dbQueries.CreateRefreshToken(req.Context(),createRefreshTokenQp)

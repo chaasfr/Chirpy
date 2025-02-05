@@ -20,7 +20,7 @@ VALUES(
     $2,
     NOW() + interval '60' day
 )
-RETURNING token, create_at, updated_at, user_id, expires_at, revoked_at
+RETURNING token, created_at, updated_at, user_id, expires_at, revoked_at
 `
 
 type CreateRefreshTokenParams struct {
@@ -33,7 +33,25 @@ func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshToken
 	var i RefreshToken
 	err := row.Scan(
 		&i.Token,
-		&i.CreateAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.ExpiresAt,
+		&i.RevokedAt,
+	)
+	return i, err
+}
+
+const getRefreshToken = `-- name: GetRefreshToken :one
+select token, created_at, updated_at, user_id, expires_at, revoked_at from refresh_tokens where token = $1
+`
+
+func (q *Queries) GetRefreshToken(ctx context.Context, token string) (RefreshToken, error) {
+	row := q.db.QueryRowContext(ctx, getRefreshToken, token)
+	var i RefreshToken
+	err := row.Scan(
+		&i.Token,
+		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
 		&i.ExpiresAt,

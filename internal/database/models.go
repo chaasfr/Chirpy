@@ -21,7 +21,7 @@ type Chirp struct {
 
 type RefreshToken struct {
 	Token     string
-	CreateAt  time.Time
+	CreatedAt time.Time
 	UpdatedAt time.Time
 	UserID    uuid.UUID
 	ExpiresAt time.Time
