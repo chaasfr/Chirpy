@@ -13,7 +13,6 @@ import (
 
 type CreateChirpInput struct {
 	Body   string `json:"body"`
-	UserId string `json:"user_id"`
 }
 
 type ChirpJson struct {
@@ -48,14 +47,14 @@ func (cfg *apiConfig) HandlerCreateChirp(rw http.ResponseWriter, req *http.Reque
 	}
 
 	chirpBody := validateChirp(input.Body)
-	uuidId, err := uuid.Parse(input.UserId)
+	userId, err := uuid.Parse(req.Header.Get(UseridFromJwtKey))
 	if err != nil {
 		log.Printf("error converting uuid %s", err)
 		ReturnJsonGenericInternalError(rw)
 		return
 	}
 
-	qp := database.CreateChirpParams{Body: chirpBody, UserID: uuidId}
+	qp := database.CreateChirpParams{Body: chirpBody, UserID: userId}
 	chirp, err := cfg.dbQueries.CreateChirp(req.Context(), qp)
 	if err != nil {
 		log.Printf("error saving chirp to db %s", err)

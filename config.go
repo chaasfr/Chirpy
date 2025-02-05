@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
-	"net/http"
+	
 	"os"
 	"sync/atomic"
 
@@ -37,20 +37,3 @@ func initDbConnection() *database.Queries {
 	return database.New(db)
 }
 
-func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		cfg.fileserverHits.Add(1)
-		next.ServeHTTP(rw, req)
-	})
-}
-
-func (cfg *apiConfig) middlewareDevPlatformOnly(next func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
-	return func(rw http.ResponseWriter, req *http.Request) {
-		if cfg.platform != "dev" {
-			log.Printf("This endpoint is only for dev %s", req.RequestURI)
-			ReturnJsonError(rw, 403, "forbidden outside of dev platform")
-			return
-		}
-		next(rw, req)
-	}
-}

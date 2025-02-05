@@ -4,20 +4,20 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/chaasfr/chirpy/internal/auth"
+	"github.com/chaasfr/chirpy/internal/database"
 )
 
 type LoginInput struct{
 	Password         string `json:"password"`
 	Email            string `json:"email"`
-	ExpiresInSeconds *int64 `json:"expires_in_seconds,omitempty"`
 }
 
 type userWithTokenJson struct{
 	userJson
 	Token    string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 func (cfg *apiConfig)HandlerLogin(rw http.ResponseWriter, req *http.Request){
@@ -45,18 +45,37 @@ func (cfg *apiConfig)HandlerLogin(rw http.ResponseWriter, req *http.Request){
 		return
 	}
 
-	jwtDuration := auth.JwtDefaultDuration
-	if input.ExpiresInSeconds != nil {
-		jwtDuration = time.Duration(*input.ExpiresInSeconds) * time.Second
-	}
-	token, err := auth.MakeJWT(userDb.ID, cfg.jwtSecret, jwtDuration)
-
+	token, err := auth.MakeJWT(userDb.ID, cfg.jwtSecret, auth.JwtDefaultDuration)
 	if err != nil {
 		log.Printf("error creating JWT token %s", err)
 		ReturnJsonGenericInternalError(rw)
 		return
 	}
+
+	refreshToken, err := auth.MakeRefreshToken()
+	if err != nil {
+		log.Printf("error creating refresh token %s", err)
+		ReturnJsonGenericInternalError(rw)
+		return
+	}
+
+	createRefreshTokenQp := database.CreateRefreshTokenParams{
+		Token:  token,
+		UserID: userDb.ID,
+	}
+	_, err = cfg.dbQueries.CreateRefreshToken(req.Context(),createRefreshTokenQp)
+	if err != nil {
+		log.Printf("error storing refresh token %s", err)
+		ReturnJsonGenericInternalError(rw)
+		return
+	}
+
+
 	userJson := userJsonFromDb(userDb)
-	userWithTokenJson := userWithTokenJson{userJson: userJson, Token: token}
+	userWithTokenJson := userWithTokenJson{
+		userJson: userJson,
+		Token: token,
+		RefreshToken: refreshToken,
+	}
 	ReturnWithJSON(rw, 200, userWithTokenJson)
 }
