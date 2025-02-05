@@ -11,8 +11,6 @@ type GenericJsonError struct {
 }
 
 func GetInputStruct(dst interface{}, rw http.ResponseWriter, req *http.Request) {
-	rw.Header().Add("Content-Type", "text/json")
-
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(dst)
 	if err != nil {
@@ -46,6 +44,7 @@ func ReturnWithJSON(rw http.ResponseWriter, code int, payload interface{}){
 		ReturnGenericJsonError(rw)
 		return
 	}
+	rw.Header().Add("Content-Type", "text/json")
 	rw.WriteHeader(code)
 	rw.Write(dat)
 }

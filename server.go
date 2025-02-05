@@ -10,6 +10,7 @@ import (
 	const fileServerEndpoint = "/app/"
 	const CreateUserEndpoint = "POST /api/users"
 	const CreateChirpEndpoint = "POST /api/chirps"
+	const GetChirpsEndpoint = "GET /api/chirps"
 
 	const metricsEndpoint = "GET /admin/metrics"
 	const resetMetricsEndpoint ="POST /admin/reset"
@@ -26,6 +27,7 @@ func InitServer() {
 	mux.HandleFunc(resetMetricsEndpoint, cfg.middlewareDevPlatformOnly(cfg.HandlerReset))
 	mux.HandleFunc(CreateChirpEndpoint, cfg.HandlerCreateChirp)
 	mux.HandleFunc(CreateUserEndpoint, cfg.HandlerCreateUser)
+	mux.HandleFunc(GetChirpsEndpoint, cfg.HandlerGetChirps)
 
 	var httpServer http.Server
 	httpServer.Handler = mux

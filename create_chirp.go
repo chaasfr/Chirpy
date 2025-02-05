@@ -16,7 +16,7 @@ type CreateChirpInput struct {
 	UserId string `json:"user_id"`
 }
 
-type CreateChirpOutput struct {
+type ChirpJson struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -24,8 +24,8 @@ type CreateChirpOutput struct {
 	UserID    uuid.UUID `json:"user_id"`
 }
 
-func newCreateChirpOutput(chirp *database.Chirp) *CreateChirpOutput {
-	return &CreateChirpOutput{
+func ChirpJsonFromDb(chirp *database.Chirp) *ChirpJson {
+	return &ChirpJson{
 		ID: chirp.ID,
 		CreatedAt: chirp.CreatedAt,
 		UpdatedAt: chirp.UpdatedAt,
@@ -34,7 +34,7 @@ func newCreateChirpOutput(chirp *database.Chirp) *CreateChirpOutput {
 	}
 }
 
-func (cfg apiConfig)HandlerCreateChirp(rw http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig)HandlerCreateChirp(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Add("Content-Type", "text/json")
 
 	input := CreateChirpInput{}
@@ -61,7 +61,7 @@ func (cfg apiConfig)HandlerCreateChirp(rw http.ResponseWriter, req *http.Request
 		return
 	}
 
-	output := newCreateChirpOutput(&chirp)
+	output := ChirpJsonFromDb(&chirp)
 
 	ReturnWithJSON(rw, 201, output)
 }
