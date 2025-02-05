@@ -10,14 +10,15 @@ type GenericJsonError struct {
 	Error string `json:"error"`
 }
 
-func GetInputStruct(dst interface{}, rw http.ResponseWriter, req *http.Request) {
+func GetInputStruct(dst interface{}, rw http.ResponseWriter, req *http.Request) error {
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(dst)
 	if err != nil {
 		log.Printf("error decoding JSON %s", err)
 		ReturnJsonGenericInternalError(rw)
-		return
+		return err
 	}
+	return nil
 }
 
 func ReturnJsonGenericInternalError(rw http.ResponseWriter) {

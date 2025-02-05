@@ -13,18 +13,29 @@ type CreateUserInput struct {
 	Email string `json:"email"`
 }
 
-type CreateUserOutput struct {
+type userJson struct {
 	ID        string `json:"id"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 	Email     string `json:"email"`
 }
 
+func userJsonFromDb(user database.User) userJson {
+	return userJson{
+		user.ID.String(),
+		user.CreatedAt.String(),
+		user.UpdatedAt.String(),
+		user.Email,
+	}
+}
+
 func (cfg *apiConfig) HandlerCreateUser(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Add("Content-Type", "text/json")
 
 	input := CreateUserInput{}
-	GetInputStruct(&input, rw, req)
+	if err:=GetInputStruct(&input, rw, req); err != nil {
+		return
+	}
 
 	hashed_password, err := auth.HashPassword(input.Password)
 	if err != nil {
@@ -42,11 +53,6 @@ func (cfg *apiConfig) HandlerCreateUser(rw http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	output := CreateUserOutput{
-		user.ID.String(),
-		user.CreatedAt.String(),
-		user.UpdatedAt.String(),
-		user.Email,
-	}
+	output := userJsonFromDb(user)
 	ReturnWithJSON(rw, 201, output)
 }

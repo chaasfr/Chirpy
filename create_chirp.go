@@ -38,7 +38,9 @@ func (cfg *apiConfig) HandlerCreateChirp(rw http.ResponseWriter, req *http.Reque
 	rw.Header().Add("Content-Type", "text/json")
 
 	input := CreateChirpInput{}
-	GetInputStruct(&input, rw, req)
+	if err:=GetInputStruct(&input, rw, req); err != nil {
+		return
+	}
 
 	if len(input.Body) > 140 {
 		ReturnJsonError(rw, 400, "Chirp is too long")

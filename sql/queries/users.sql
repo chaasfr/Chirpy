@@ -5,3 +5,6 @@ RETURNING *;
 
 -- name: DeleteUsers :exec
 DELETE FROM users;
+
+-- name: GetUserPassword :one
+SELECT * from users where email = $1;
