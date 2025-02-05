@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"net/http"
 	"strings"
 	"testing"
 	"time"
@@ -40,6 +41,40 @@ func TestJWT(t *testing.T) {
 	_, err = ValidateJWT(jwt, tokenSecret)
 	if !strings.Contains(err.Error(), "token is expired") {
 		t.Errorf("error validating jwt: %s", err)
+		return
+	}
+}
+
+func TestGetBearerToken(t *testing.T) {
+	goodToken := "good_token!"
+	goodHeader := http.Header{}
+	badHeaderNoAuth := http.Header{}
+	badHeaderNoBearer := http.Header{}
+	
+	goodHeader.Add("Authorization","random stuff and Bearer " + goodToken)
+	badHeaderNoAuth.Add("Content-Type","text/json")
+	badHeaderNoBearer.Add("Authorization", "some random bs")
+
+	token, err := GetBearerToken(goodHeader)
+	if err != nil {
+		t.Errorf("error getting bearer token: %s", err)
+		return
+	}
+
+	if token != goodToken {
+		t.Errorf("error unexpected token %s instead of %s", token, goodToken)
+		return
+	}
+
+	_, err = GetBearerToken(badHeaderNoAuth)
+	if err.Error() !=errorNoAuth {
+		t.Errorf("wrong error when no auth: %s", err)
+		return
+	}
+
+	_, err = GetBearerToken(badHeaderNoBearer)
+	if err.Error() != errorNoBearerToken {
+		t.Errorf("wrong error when no auth: %s", err)
 		return
 	}
 }

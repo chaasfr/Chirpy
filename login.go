@@ -4,13 +4,20 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/chaasfr/chirpy/internal/auth"
 )
 
 type LoginInput struct{
-	Password string `json:"password"`
-	Email string `json:"email"`
+	Password         string `json:"password"`
+	Email            string `json:"email"`
+	ExpiresInSeconds *int64 `json:"expires_in_seconds,omitempty"`
+}
+
+type userWithTokenJson struct{
+	userJson
+	Token    string `json:"token"`
 }
 
 func (cfg *apiConfig)HandlerLogin(rw http.ResponseWriter, req *http.Request){
@@ -38,6 +45,18 @@ func (cfg *apiConfig)HandlerLogin(rw http.ResponseWriter, req *http.Request){
 		return
 	}
 
-	output := userJsonFromDb(userDb)
-	ReturnWithJSON(rw, 200, output)
+	jwtDuration := auth.JwtDefaultDuration
+	if input.ExpiresInSeconds != nil {
+		jwtDuration = time.Duration(*input.ExpiresInSeconds) * time.Second
+	}
+	token, err := auth.MakeJWT(userDb.ID, cfg.jwtSecret, jwtDuration)
+
+	if err != nil {
+		log.Printf("error creating JWT token %s", err)
+		ReturnJsonGenericInternalError(rw)
+		return
+	}
+	userJson := userJsonFromDb(userDb)
+	userWithTokenJson := userWithTokenJson{userJson: userJson, Token: token}
+	ReturnWithJSON(rw, 200, userWithTokenJson)
 }

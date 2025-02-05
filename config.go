@@ -14,12 +14,14 @@ type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries      *database.Queries
 	platform       string
+	jwtSecret      string
 }
 
 func initConfig() *apiConfig {
 	var cfg apiConfig
 	cfg.dbQueries = initDbConnection()
 	cfg.platform = os.Getenv("PLATFORM")
+	cfg.jwtSecret = os.Getenv("JWTSECRET")
 	return &cfg
 }
 
