@@ -6,9 +6,10 @@ import (
 
 	"github.com/chaasfr/chirpy/internal/auth"
 	"github.com/chaasfr/chirpy/internal/database"
+	"github.com/google/uuid"
 )
 
-type CreateUserInput struct {
+type UserInput struct {
 	Password string `json:"password"`
 	Email string `json:"email"`
 }
@@ -30,9 +31,8 @@ func userJsonFromDb(user database.User) userJson {
 }
 
 func (cfg *apiConfig) HandlerCreateUser(rw http.ResponseWriter, req *http.Request) {
-	rw.Header().Add("Content-Type", "text/json")
 
-	input := CreateUserInput{}
+	input := UserInput{}
 	if err:=GetInputStruct(&input, rw, req); err != nil {
 		return
 	}
@@ -55,4 +55,41 @@ func (cfg *apiConfig) HandlerCreateUser(rw http.ResponseWriter, req *http.Reques
 
 	output := userJsonFromDb(user)
 	ReturnWithJSON(rw, 201, output)
+}
+
+
+func (cfg *apiConfig)HandlerUpdateUser(rw http.ResponseWriter, req *http.Request) {
+	input := UserInput{}
+	if err:=GetInputStruct(&input, rw, req); err != nil {
+		return
+	}
+
+	hashed_password, err := auth.HashPassword(input.Password)
+	if err != nil {
+		log.Printf("Error hashing password %s", err)
+		ReturnJsonGenericInternalError(rw)
+		return
+	}
+	
+	userId, err := uuid.Parse(req.Header.Get(UseridFromJwtKey))
+	if err != nil {
+		log.Printf("error converting uuid %s", err)
+		ReturnJsonGenericInternalError(rw)
+		return
+	}
+
+	qp := database.UpdateUserParams{
+		Email:          input.Email,
+		HashedPassword: hashed_password,
+		ID:             userId,
+	}
+	user, err := cfg.dbQueries.UpdateUser(req.Context(),qp)
+	if err != nil {
+		log.Printf("error updating user in db %s", err)
+		ReturnJsonGenericInternalError(rw)
+		return
+	}
+
+	userJson := userJsonFromDb(user)
+	ReturnWithJSON(rw, 200, userJson)
 }

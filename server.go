@@ -8,10 +8,14 @@ const filepathRoot = "."
 
 const readynessEndpoint = "GET /api/healthz"
 const fileServerEndpoint = "/app/"
+
 const CreateUserEndpoint = "POST /api/users"
+const UpdateUserEndpoint = "PUT /api/users"
+
 const CreateChirpEndpoint = "POST /api/chirps"
 const GetChirpsEndpoint = "GET /api/chirps"
 const GetChirpByIDEndpoint = "GET /api/chirps/{chirpID}"
+
 const LoginEndpoint = "POST /api/login"
 const RefreshEndpoint = "POST /api/refresh"
 const RevokeEndpoint = "POST /api/revoke"
@@ -36,6 +40,7 @@ func InitServer() {
 	mux.HandleFunc(LoginEndpoint, cfg.HandlerLogin)
 	mux.HandleFunc(RefreshEndpoint, cfg.HandlerRefresh)
 	mux.HandleFunc(RevokeEndpoint, cfg.HandlerRevoke)
+	mux.HandleFunc(UpdateUserEndpoint, cfg.mdwValidateJWT(cfg.HandlerUpdateUser))
 
 	var httpServer http.Server
 	httpServer.Handler = mux

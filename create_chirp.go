@@ -34,7 +34,6 @@ func ChirpJsonFromDb(chirp *database.Chirp) *ChirpJson {
 }
 
 func (cfg *apiConfig) HandlerCreateChirp(rw http.ResponseWriter, req *http.Request) {
-	rw.Header().Add("Content-Type", "text/json")
 
 	input := CreateChirpInput{}
 	if err:=GetInputStruct(&input, rw, req); err != nil {
