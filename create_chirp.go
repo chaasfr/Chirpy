@@ -12,7 +12,7 @@ import (
 )
 
 type CreateChirpInput struct {
-	Body string `json:"body"`
+	Body   string `json:"body"`
 	UserId string `json:"user_id"`
 }
 
@@ -20,21 +20,21 @@ type ChirpJson struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Body      string `json:"body"`
+	Body      string    `json:"body"`
 	UserID    uuid.UUID `json:"user_id"`
 }
 
 func ChirpJsonFromDb(chirp *database.Chirp) *ChirpJson {
 	return &ChirpJson{
-		ID: chirp.ID,
+		ID:        chirp.ID,
 		CreatedAt: chirp.CreatedAt,
 		UpdatedAt: chirp.UpdatedAt,
-		Body: chirp.Body,
-		UserID: chirp.UserID,
+		Body:      chirp.Body,
+		UserID:    chirp.UserID,
 	}
 }
 
-func (cfg *apiConfig)HandlerCreateChirp(rw http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig) HandlerCreateChirp(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Add("Content-Type", "text/json")
 
 	input := CreateChirpInput{}
@@ -49,15 +49,15 @@ func (cfg *apiConfig)HandlerCreateChirp(rw http.ResponseWriter, req *http.Reques
 	uuidId, err := uuid.Parse(input.UserId)
 	if err != nil {
 		log.Printf("error converting uuid %s", err)
-		ReturnGenericJsonError(rw)
+		ReturnJsonGenericInternalError(rw)
 		return
 	}
 
-	qp := database.CreateChirpParams{ Body: chirpBody, UserID: uuidId}
+	qp := database.CreateChirpParams{Body: chirpBody, UserID: uuidId}
 	chirp, err := cfg.dbQueries.CreateChirp(req.Context(), qp)
 	if err != nil {
 		log.Printf("error saving chirp to db %s", err)
-		ReturnGenericJsonError(rw)
+		ReturnJsonGenericInternalError(rw)
 		return
 	}
 
@@ -67,12 +67,12 @@ func (cfg *apiConfig)HandlerCreateChirp(rw http.ResponseWriter, req *http.Reques
 }
 
 func validateChirp(chirp string) string {
-	badWords := []string {"kerfuffle", "sharbert", "fornax"}
+	badWords := []string{"kerfuffle", "sharbert", "fornax"}
 	chirpSlice := strings.Split(chirp, " ")
-	for i, word := range chirpSlice{
+	for i, word := range chirpSlice {
 		if slices.Contains(badWords, strings.ToLower(word)) {
 			chirpSlice[i] = "****"
 		}
 	}
-	return strings.Join(chirpSlice," ")
+	return strings.Join(chirpSlice, " ")
 }
