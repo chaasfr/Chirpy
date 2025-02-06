@@ -69,7 +69,7 @@ func (cfg *apiConfig) HandlerCreateChirp(rw http.ResponseWriter, req *http.Reque
 	}
 
 	qp := database.CreateChirpParams{Body: chirpBody, UserID: userId}
-	chirp, err := cfg.dbQueries.CreateChirp(req.Context(), qp)
+	chirp, err := cfg.DbQueries.CreateChirp(req.Context(), qp)
 	if err != nil {
 		log.Printf("error saving chirp to db %s", err)
 		ReturnJsonGenericInternalError(rw)
@@ -82,7 +82,7 @@ func (cfg *apiConfig) HandlerCreateChirp(rw http.ResponseWriter, req *http.Reque
 }
 
 func (cfg *apiConfig) HandlerGetChirps(rw http.ResponseWriter, req *http.Request) {
-	chirpsDb, err := cfg.dbQueries.GetAllChirp(req.Context())
+	chirpsDb, err := cfg.DbQueries.GetAllChirp(req.Context())
 
 	if err != nil {
 		log.Printf("error retrieving chirps fro, db %s", err)
@@ -109,7 +109,7 @@ func (cfg *apiConfig) HandlerGetChirpById(rw http.ResponseWriter, req *http.Requ
 		ReturnJsonError(rw, 404, "chirp not found - id is invalid")
 		return
 	}
-	chirpDb, err := cfg.dbQueries.GetChirp(req.Context(), chirpId)
+	chirpDb, err := cfg.DbQueries.GetChirp(req.Context(), chirpId)
 	if err != nil {
 		if strings.Contains(err.Error(), "no rows") {
 			ReturnJsonError(rw, 404, "chirp not found")
@@ -136,7 +136,7 @@ func (cfg *apiConfig) HandlerDeleteChirpById(rw http.ResponseWriter, req *http.R
 		return
 	}
 
-	chirpDb, err := cfg.dbQueries.GetChirp(req.Context(), chirpId)
+	chirpDb, err := cfg.DbQueries.GetChirp(req.Context(), chirpId)
 	if err != nil {
 		if strings.Contains(err.Error(), "no rows") {
 			ReturnJsonError(rw, 404, "chirp not found")
@@ -160,7 +160,7 @@ func (cfg *apiConfig) HandlerDeleteChirpById(rw http.ResponseWriter, req *http.R
 		return
 	}
 
-	err = cfg.dbQueries.DeleteChirp(req.Context(), chirpId)
+	err = cfg.DbQueries.DeleteChirp(req.Context(), chirpId)
 	if err != nil {
 		log.Printf("error deleting from DB chirp %v", chirpId)
 		ReturnJsonGenericInternalError(rw)

@@ -19,7 +19,7 @@ type userJson struct {
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
 	Email       string `json:"email"`
-	IsChirpyRed bool `json:"is_chirpy_red"`
+	IsChirpyRed bool   `json:"is_chirpy_red"`
 }
 
 func userJsonFromDb(user database.User) userJson {
@@ -48,7 +48,7 @@ func (cfg *apiConfig) HandlerCreateUser(rw http.ResponseWriter, req *http.Reques
 
 	qp := database.CreateUserParams{Email: input.Email, HashedPassword: hashed_password}
 
-	user, err := cfg.dbQueries.CreateUser(req.Context(), qp)
+	user, err := cfg.DbQueries.CreateUser(req.Context(), qp)
 	if err != nil {
 		log.Printf("Error creating user %s", err)
 		ReturnJsonGenericInternalError(rw)
@@ -84,7 +84,7 @@ func (cfg *apiConfig) HandlerUpdateUser(rw http.ResponseWriter, req *http.Reques
 		HashedPassword: hashed_password,
 		ID:             userId,
 	}
-	user, err := cfg.dbQueries.UpdateUser(req.Context(), qp)
+	user, err := cfg.DbQueries.UpdateUser(req.Context(), qp)
 	if err != nil {
 		log.Printf("error updating user in db %s", err)
 		ReturnJsonGenericInternalError(rw)

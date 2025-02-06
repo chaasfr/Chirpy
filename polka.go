@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/chaasfr/chirpy/internal/auth"
 	"github.com/google/uuid"
 )
 
 type PolkaWebhookInput struct {
 	Event string `json:"event"`
-	Data  Data   `json:"data"` 
+	Data  Data   `json:"data"`
 }
 
 type Data struct {
@@ -19,7 +20,19 @@ type Data struct {
 
 const UserUpgradedEvent = "user.upgraded"
 
-func (cfg *apiConfig)HandlerPolkaWebhook(rw http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig) HandlerPolkaWebhook(rw http.ResponseWriter, req *http.Request) {
+	receivedApiKey, err := auth.GetAPIKey(req.Header)
+	if err != nil {
+		log.Printf("cannot extract api key from header %s",err)
+		ReturnJsonError(rw, 401, "cannot get api key")
+		return
+	}
+
+	if receivedApiKey != cfg.PolkaKey {
+		ReturnJsonError(rw, 401, "wrong api key")
+		return
+	}
+	
 	var input PolkaWebhookInput
 	GetInputStructFromJson(&input, rw, req)
 
@@ -35,7 +48,7 @@ func (cfg *apiConfig)HandlerPolkaWebhook(rw http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	err = cfg.dbQueries.UpgradeUser(req.Context(), userid)
+	err = cfg.DbQueries.UpgradeUser(req.Context(), userid)
 	if err != nil {
 		if strings.Contains(err.Error(), "no rows") {
 			ReturnJsonError(rw, 404, "user not found")

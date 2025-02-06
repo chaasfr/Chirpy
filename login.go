@@ -27,7 +27,7 @@ func (cfg *apiConfig) HandlerLogin(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userDb, err := cfg.dbQueries.GetUserPassword(req.Context(), input.Email)
+	userDb, err := cfg.DbQueries.GetUserPassword(req.Context(), input.Email)
 	if err != nil {
 		if strings.Contains(err.Error(), "no row") {
 			ReturnJsonError(rw, 401, "incorrect email or password")
@@ -45,7 +45,7 @@ func (cfg *apiConfig) HandlerLogin(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	token, err := auth.MakeJWT(userDb.ID, cfg.jwtSecret, auth.JwtDefaultDuration)
+	token, err := auth.MakeJWT(userDb.ID, cfg.JWTSecret, auth.JwtDefaultDuration)
 	if err != nil {
 		log.Printf("error creating JWT token %s", err)
 		ReturnJsonGenericInternalError(rw)
@@ -63,7 +63,7 @@ func (cfg *apiConfig) HandlerLogin(rw http.ResponseWriter, req *http.Request) {
 		Token:  refreshToken,
 		UserID: userDb.ID,
 	}
-	_, err = cfg.dbQueries.CreateRefreshToken(req.Context(), createRefreshTokenQp)
+	_, err = cfg.DbQueries.CreateRefreshToken(req.Context(), createRefreshTokenQp)
 	if err != nil {
 		log.Printf("error storing refresh token %s", err)
 		ReturnJsonGenericInternalError(rw)

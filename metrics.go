@@ -5,7 +5,6 @@ import (
 	"net/http"
 )
 
-
 func (cfg *apiConfig) HandlerMetrics(rw http.ResponseWriter, req *http.Request) {
 	req.Header.Set("Content-Type", "text/html")
 	rw.WriteHeader(200)
@@ -15,6 +14,6 @@ func (cfg *apiConfig) HandlerMetrics(rw http.ResponseWriter, req *http.Request) 
     <h1>Welcome, Chirpy Admin</h1>
     <p>Chirpy has been visited %v times!</p>
   </body>
-</html>`, cfg.fileserverHits.Load())
+</html>`, cfg.FileserverHits.Load())
 	rw.Write([]byte(text))
 }

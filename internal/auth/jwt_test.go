@@ -13,8 +13,8 @@ func TestJWT(t *testing.T) {
 	userid := uuid.New()
 	tokenSecret := "sheeshIamASecret"
 	wrongTokenSecret := "ohnoIamIncorrect"
-	testDuration := time.Duration(1*time.Second)
-	jwt, err := MakeJWT(userid,tokenSecret, testDuration)
+	testDuration := time.Duration(1 * time.Second)
+	jwt, err := MakeJWT(userid, tokenSecret, testDuration)
 	if err != nil {
 		t.Errorf("error creating jwt: %s", err)
 		return
@@ -26,7 +26,7 @@ func TestJWT(t *testing.T) {
 		return
 	}
 
-	if idReceived !=userid {
+	if idReceived != userid {
 		t.Errorf("error validating ids %v and %v", idReceived, userid)
 	}
 
@@ -50,9 +50,9 @@ func TestGetBearerToken(t *testing.T) {
 	goodHeader := http.Header{}
 	badHeaderNoAuth := http.Header{}
 	badHeaderNoBearer := http.Header{}
-	
-	goodHeader.Add("Authorization","random stuff and Bearer " + goodToken)
-	badHeaderNoAuth.Add("Content-Type","text/json")
+
+	goodHeader.Add("Authorization", "random stuff and Bearer "+goodToken)
+	badHeaderNoAuth.Add("Content-Type", "text/json")
 	badHeaderNoBearer.Add("Authorization", "some random bs")
 
 	token, err := GetBearerToken(goodHeader)
@@ -67,13 +67,13 @@ func TestGetBearerToken(t *testing.T) {
 	}
 
 	_, err = GetBearerToken(badHeaderNoAuth)
-	if err.Error() !=errorNoAuth {
+	if err.Error() != errorNoAuth {
 		t.Errorf("wrong error when no auth: %s", err)
 		return
 	}
 
 	_, err = GetBearerToken(badHeaderNoBearer)
-	if err.Error() != errorNoBearerToken {
+	if err.Error() != BearerKey+errorNoKeyInAuth {
 		t.Errorf("wrong error when no auth: %s", err)
 		return
 	}

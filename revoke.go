@@ -13,7 +13,7 @@ func (cfg *apiConfig) HandlerRevoke(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = cfg.dbQueries.RevokeRefreshToken(req.Context(), rtoken)
+	err = cfg.DbQueries.RevokeRefreshToken(req.Context(), rtoken)
 	if err != nil {
 		ReturnJsonError(rw, 401, "unknown refresh token")
 		return

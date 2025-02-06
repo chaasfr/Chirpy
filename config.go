@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
-	
+
 	"os"
 	"sync/atomic"
 
@@ -11,17 +11,19 @@ import (
 )
 
 type apiConfig struct {
-	fileserverHits atomic.Int32
-	dbQueries      *database.Queries
-	platform       string
-	jwtSecret      string
+	FileserverHits atomic.Int32
+	DbQueries      *database.Queries
+	Platform       string
+	JWTSecret      string
+	PolkaKey       string
 }
 
 func initConfig() *apiConfig {
 	var cfg apiConfig
-	cfg.dbQueries = initDbConnection()
-	cfg.platform = os.Getenv("PLATFORM")
-	cfg.jwtSecret = os.Getenv("JWTSECRET")
+	cfg.DbQueries = initDbConnection()
+	cfg.Platform = os.Getenv("PLATFORM")
+	cfg.JWTSecret = os.Getenv("JWTSECRET")
+	cfg.PolkaKey = os .Getenv("POLKA_KEY")
 	return &cfg
 }
 
@@ -36,4 +38,3 @@ func initDbConnection() *database.Queries {
 
 	return database.New(db)
 }
-

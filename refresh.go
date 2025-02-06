@@ -7,7 +7,7 @@ import (
 	"github.com/chaasfr/chirpy/internal/auth"
 )
 
-type RefreshJson struct{
+type RefreshJson struct {
 	Token string `json:"token"`
 }
 
@@ -18,7 +18,7 @@ func (cfg *apiConfig) HandlerRefresh(rw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	rtokenDb, err := cfg.dbQueries.GetRefreshToken(req.Context(), rtoken)
+	rtokenDb, err := cfg.DbQueries.GetRefreshToken(req.Context(), rtoken)
 	if err != nil {
 		ReturnJsonError(rw, 401, "unknown refresh token")
 		return
@@ -34,12 +34,12 @@ func (cfg *apiConfig) HandlerRefresh(rw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	jwt, err := auth.MakeJWT(rtokenDb.UserID, cfg.jwtSecret, auth.JwtDefaultDuration)
+	jwt, err := auth.MakeJWT(rtokenDb.UserID, cfg.JWTSecret, auth.JwtDefaultDuration)
 	if err != nil {
 		ReturnJsonGenericInternalError(rw)
 		return
 	}
 
-	refreshJson := RefreshJson{Token:jwt}
+	refreshJson := RefreshJson{Token: jwt}
 	ReturnWithJSON(rw, 200, refreshJson)
 }
