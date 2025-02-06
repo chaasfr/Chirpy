@@ -14,7 +14,7 @@ import (
 const chirpIdPathValue = "chirpID"
 
 type CreateChirpInput struct {
-	Body   string `json:"body"`
+	Body string `json:"body"`
 }
 
 type ChirpJson struct {
@@ -51,7 +51,7 @@ func validateChirp(chirp string) string {
 func (cfg *apiConfig) HandlerCreateChirp(rw http.ResponseWriter, req *http.Request) {
 
 	input := CreateChirpInput{}
-	if err:=GetInputStruct(&input, rw, req); err != nil {
+	if err := GetInputStructFromJson(&input, rw, req); err != nil {
 		return
 	}
 
@@ -111,15 +111,15 @@ func (cfg *apiConfig) HandlerGetChirpById(rw http.ResponseWriter, req *http.Requ
 	}
 	chirpDb, err := cfg.dbQueries.GetChirp(req.Context(), chirpId)
 	if err != nil {
-		if strings.Contains(err.Error(),"no rows") {
+		if strings.Contains(err.Error(), "no rows") {
 			ReturnJsonError(rw, 404, "chirp not found")
 			return
 		} else {
 			log.Printf("error retrieving chirp %s", err)
-		ReturnJsonGenericInternalError(rw)
-		return
+			ReturnJsonGenericInternalError(rw)
+			return
 		}
-		
+
 	}
 
 	chirpJson := ChirpJsonFromDb(&chirpDb)
@@ -137,14 +137,14 @@ func (cfg *apiConfig) HandlerDeleteChirpById(rw http.ResponseWriter, req *http.R
 	}
 
 	chirpDb, err := cfg.dbQueries.GetChirp(req.Context(), chirpId)
-	if err != nil  {
-		if strings.Contains(err.Error(),"no rows") {
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows") {
 			ReturnJsonError(rw, 404, "chirp not found")
 			return
 		} else {
 			log.Printf("error retrieving chirp %s", err)
-		ReturnJsonGenericInternalError(rw)
-		return
+			ReturnJsonGenericInternalError(rw)
+			return
 		}
 	}
 

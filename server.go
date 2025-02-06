@@ -4,10 +4,10 @@ import (
 	"net/http"
 )
 
-const filepathRoot = "."
+const FilepathRoot = "."
 
-const readynessEndpoint = "GET /api/healthz"
-const fileServerEndpoint = "/app/"
+const ReadynessEndpoint = "GET /api/healthz"
+const FileServerEndpoint = "/app/"
 
 const CreateUserEndpoint = "POST /api/users"
 const UpdateUserEndpoint = "PUT /api/users"
@@ -21,17 +21,19 @@ const LoginEndpoint = "POST /api/login"
 const RefreshEndpoint = "POST /api/refresh"
 const RevokeEndpoint = "POST /api/revoke"
 
-const metricsEndpoint = "GET /admin/metrics"
-const resetMetricsEndpoint = "POST /admin/reset"
+const MetricsEndpoint = "GET /admin/metrics"
+const ResetMetricsEndpoint = "POST /admin/reset"
+
+const PolkaWebhookEndpoint = "POST /api/polka/webhooks"
 
 const port = "8080"
 
 func InitServer() {
 	mux := http.NewServeMux()
 	cfg := initConfig()
-	fileServer := http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))
-	mux.HandleFunc(readynessEndpoint, HandlerReadiness)
-	mux.Handle(fileServerEndpoint, cfg.mdwMetricsInc(fileServer))
+	fileServer := http.StripPrefix("/app", http.FileServer(http.Dir(FilepathRoot)))
+	mux.HandleFunc(ReadynessEndpoint, HandlerReadiness)
+	mux.Handle(FileServerEndpoint, cfg.mdwMetricsInc(fileServer))
 	
 	mux.HandleFunc(CreateUserEndpoint, cfg.HandlerCreateUser)
 	mux.HandleFunc(UpdateUserEndpoint, cfg.mdwValidateJWT(cfg.HandlerUpdateUser))
@@ -47,8 +49,10 @@ func InitServer() {
 	mux.HandleFunc(RefreshEndpoint, cfg.HandlerRefresh)
 	mux.HandleFunc(RevokeEndpoint, cfg.HandlerRevoke)
 
-	mux.HandleFunc(metricsEndpoint, cfg.HandlerMetrics)
-	mux.HandleFunc(resetMetricsEndpoint, cfg.mdwDevPlatformOnly(cfg.HandlerReset))
+	mux.HandleFunc(MetricsEndpoint, cfg.HandlerMetrics)
+	mux.HandleFunc(ResetMetricsEndpoint, cfg.mdwDevPlatformOnly(cfg.HandlerReset))
+
+	mux.HandleFunc(PolkaWebhookEndpoint, cfg.HandlerPolkaWebhook)
 
 	var httpServer http.Server
 	httpServer.Handler = mux

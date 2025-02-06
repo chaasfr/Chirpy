@@ -11,14 +11,15 @@ import (
 
 type UserInput struct {
 	Password string `json:"password"`
-	Email string `json:"email"`
+	Email    string `json:"email"`
 }
 
 type userJson struct {
-	ID        string `json:"id"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	Email     string `json:"email"`
+	ID          string `json:"id"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+	Email       string `json:"email"`
+	IsChirpyRed bool `json:"is_chirpy_red"`
 }
 
 func userJsonFromDb(user database.User) userJson {
@@ -27,13 +28,14 @@ func userJsonFromDb(user database.User) userJson {
 		user.CreatedAt.String(),
 		user.UpdatedAt.String(),
 		user.Email,
+		user.IsChirpyRed,
 	}
 }
 
 func (cfg *apiConfig) HandlerCreateUser(rw http.ResponseWriter, req *http.Request) {
 
 	input := UserInput{}
-	if err:=GetInputStruct(&input, rw, req); err != nil {
+	if err := GetInputStructFromJson(&input, rw, req); err != nil {
 		return
 	}
 
@@ -57,10 +59,9 @@ func (cfg *apiConfig) HandlerCreateUser(rw http.ResponseWriter, req *http.Reques
 	ReturnWithJSON(rw, 201, output)
 }
 
-
-func (cfg *apiConfig)HandlerUpdateUser(rw http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig) HandlerUpdateUser(rw http.ResponseWriter, req *http.Request) {
 	input := UserInput{}
-	if err:=GetInputStruct(&input, rw, req); err != nil {
+	if err := GetInputStructFromJson(&input, rw, req); err != nil {
 		return
 	}
 
@@ -70,7 +71,7 @@ func (cfg *apiConfig)HandlerUpdateUser(rw http.ResponseWriter, req *http.Request
 		ReturnJsonGenericInternalError(rw)
 		return
 	}
-	
+
 	userId, ok := req.Context().Value(UseridFromJwtKey).(uuid.UUID)
 	if !ok {
 		log.Printf("Error retrieveing userId from ctx\n")
@@ -83,7 +84,7 @@ func (cfg *apiConfig)HandlerUpdateUser(rw http.ResponseWriter, req *http.Request
 		HashedPassword: hashed_password,
 		ID:             userId,
 	}
-	user, err := cfg.dbQueries.UpdateUser(req.Context(),qp)
+	user, err := cfg.dbQueries.UpdateUser(req.Context(), qp)
 	if err != nil {
 		log.Printf("error updating user in db %s", err)
 		ReturnJsonGenericInternalError(rw)
