@@ -11,7 +11,8 @@ import (
 	"github.com/google/uuid"
 )
 
-const chirpIdPathValue = "chirpID"
+const ChirpIdPathValue = "chirpID"
+const AuthorIdQueryParamKey = "author_id"
 
 type CreateChirpInput struct {
 	Body string `json:"body"`
@@ -81,11 +82,25 @@ func (cfg *apiConfig) HandlerCreateChirp(rw http.ResponseWriter, req *http.Reque
 	ReturnWithJSON(rw, 201, output)
 }
 
+
 func (cfg *apiConfig) HandlerGetChirps(rw http.ResponseWriter, req *http.Request) {
-	chirpsDb, err := cfg.DbQueries.GetAllChirp(req.Context())
+	var chirpsDb []database.Chirp
+	var err error
+
+	if req.URL.Query().Has(AuthorIdQueryParamKey) {
+		authorIdStr := req.URL.Query().Get(AuthorIdQueryParamKey)
+		auhorId, errParse := uuid.Parse(authorIdStr)
+		if errParse != nil {
+			ReturnJsonError(rw, 500, "invalid " + AuthorIdQueryParamKey)
+			return
+		}
+		chirpsDb, err = cfg.DbQueries.GetAllChirpFromUser(req.Context(), auhorId)
+	} else {
+		chirpsDb, err = cfg.DbQueries.GetAllChirp(req.Context())
+	}
 
 	if err != nil {
-		log.Printf("error retrieving chirps fro, db %s", err)
+		log.Printf("error retrieving chirps from db %s", err)
 		ReturnJsonGenericInternalError(rw)
 		return
 	}
@@ -101,7 +116,7 @@ func (cfg *apiConfig) HandlerGetChirps(rw http.ResponseWriter, req *http.Request
 }
 
 func (cfg *apiConfig) HandlerGetChirpById(rw http.ResponseWriter, req *http.Request) {
-	chirpIdInput := req.PathValue(chirpIdPathValue)
+	chirpIdInput := req.PathValue(ChirpIdPathValue)
 
 	chirpId, err := uuid.Parse(chirpIdInput)
 	if err != nil {
@@ -128,7 +143,7 @@ func (cfg *apiConfig) HandlerGetChirpById(rw http.ResponseWriter, req *http.Requ
 }
 
 func (cfg *apiConfig) HandlerDeleteChirpById(rw http.ResponseWriter, req *http.Request) {
-	chirpIdText := req.PathValue(chirpIdPathValue)
+	chirpIdText := req.PathValue(ChirpIdPathValue)
 
 	chirpId, err := uuid.Parse(chirpIdText)
 	if err != nil {
