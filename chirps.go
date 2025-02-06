@@ -13,6 +13,8 @@ import (
 
 const ChirpIdPathValue = "chirpID"
 const AuthorIdQueryParamKey = "author_id"
+const SortQueryParamKey = "sort"
+const SortQueryDescKeyword = "desc"
 
 type CreateChirpInput struct {
 	Body string `json:"body"`
@@ -82,6 +84,9 @@ func (cfg *apiConfig) HandlerCreateChirp(rw http.ResponseWriter, req *http.Reque
 	ReturnWithJSON(rw, 201, output)
 }
 
+func sortChips(a, b database.Chirp) bool {
+	return a.CreatedAt.After(b.CreatedAt)
+}
 
 func (cfg *apiConfig) HandlerGetChirps(rw http.ResponseWriter, req *http.Request) {
 	var chirpsDb []database.Chirp
@@ -105,6 +110,11 @@ func (cfg *apiConfig) HandlerGetChirps(rw http.ResponseWriter, req *http.Request
 		return
 	}
 
+	//sort by asc by default
+	if req.URL.Query().Get(SortQueryParamKey) == SortQueryDescKeyword {
+		slices.Reverse(chirpsDb)
+	}
+	
 	output := GetChirpsOutput{}
 
 	for _, chirpDb := range chirpsDb {
