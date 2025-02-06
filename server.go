@@ -14,8 +14,8 @@ const UpdateUserEndpoint = "PUT /api/users"
 
 const CreateChirpEndpoint = "POST /api/chirps"
 const GetChirpsEndpoint = "GET /api/chirps"
-const GetChirpByIDEndpoint = "GET /api/chirps/{chirpID}"
-const DeleteChirpByIdEndpoint = "DELETE /api/chirps/{chirpID}"
+const GetChirpByIDEndpoint = "GET /api/chirps/{" + chirpIdPathValue + "}"
+const DeleteChirpByIdEndpoint = "DELETE /api/chirps/{" + chirpIdPathValue + "}"
 
 const LoginEndpoint = "POST /api/login"
 const RefreshEndpoint = "POST /api/refresh"
@@ -41,7 +41,7 @@ func InitServer() {
 	
 	mux.HandleFunc(GetChirpsEndpoint, cfg.HandlerGetChirps)
 	mux.HandleFunc(GetChirpByIDEndpoint, cfg.HandlerGetChirpById)
-	mux.HandleFunc(DeleteChirpByIdEndpoint, cfg.HandlerDeleteChirpById)
+	mux.HandleFunc(DeleteChirpByIdEndpoint, cfg.mdwValidateJWT(cfg.HandlerDeleteChirpById))
 
 	mux.HandleFunc(LoginEndpoint, cfg.HandlerLogin)
 	mux.HandleFunc(RefreshEndpoint, cfg.HandlerRefresh)
