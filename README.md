@@ -66,7 +66,6 @@ Before running the application, ensure your database schema is up-to-date:
 1. **Navigate to the SQL schema directory:**
 ```bash
 cd sql/schema
-Run the migrations using Goose:
 ```
 
 2. **Run the migrations using Goose:**
