@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -39,10 +40,10 @@ func (cfg *apiConfig) mdwValidateJWT(next func(http.ResponseWriter, *http.Reques
 			ReturnJsonError(rw, 401, "invalid or expired token")
 			return
 		}
+		
+		ctxWithId := context.WithValue(req.Context(), UseridFromJwtKey, uuid)
+		newReq := req.WithContext(ctxWithId)
 
-		//we store it in the req to pass it to next without changing its sig
-		req.Header.Set(UseridFromJwtKey, uuid.String()) 
-
-		next(rw, req)
+		next(rw, newReq)
 	}
 }

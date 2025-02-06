@@ -15,6 +15,7 @@ const UpdateUserEndpoint = "PUT /api/users"
 const CreateChirpEndpoint = "POST /api/chirps"
 const GetChirpsEndpoint = "GET /api/chirps"
 const GetChirpByIDEndpoint = "GET /api/chirps/{chirpID}"
+const DeleteChirpByIdEndpoint = "DELETE /api/chirps/{chirpID}"
 
 const LoginEndpoint = "POST /api/login"
 const RefreshEndpoint = "POST /api/refresh"
@@ -29,18 +30,25 @@ func InitServer() {
 	mux := http.NewServeMux()
 	cfg := initConfig()
 	fileServer := http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))
-	mux.Handle(fileServerEndpoint, cfg.mdwMetricsInc(fileServer))
 	mux.HandleFunc(readynessEndpoint, HandlerReadiness)
-	mux.HandleFunc(metricsEndpoint, cfg.HandlerMetrics)
-	mux.HandleFunc(resetMetricsEndpoint, cfg.mdwDevPlatformOnly(cfg.HandlerReset))
-	mux.HandleFunc(CreateChirpEndpoint, cfg.mdwValidateJWT(cfg.HandlerCreateChirp))
+	mux.Handle(fileServerEndpoint, cfg.mdwMetricsInc(fileServer))
+	
 	mux.HandleFunc(CreateUserEndpoint, cfg.HandlerCreateUser)
+	mux.HandleFunc(UpdateUserEndpoint, cfg.mdwValidateJWT(cfg.HandlerUpdateUser))
+
+	
+	mux.HandleFunc(CreateChirpEndpoint, cfg.mdwValidateJWT(cfg.HandlerCreateChirp))
+	
 	mux.HandleFunc(GetChirpsEndpoint, cfg.HandlerGetChirps)
 	mux.HandleFunc(GetChirpByIDEndpoint, cfg.HandlerGetChirpById)
+	mux.HandleFunc(DeleteChirpByIdEndpoint, cfg.HandlerDeleteChirpById)
+
 	mux.HandleFunc(LoginEndpoint, cfg.HandlerLogin)
 	mux.HandleFunc(RefreshEndpoint, cfg.HandlerRefresh)
 	mux.HandleFunc(RevokeEndpoint, cfg.HandlerRevoke)
-	mux.HandleFunc(UpdateUserEndpoint, cfg.mdwValidateJWT(cfg.HandlerUpdateUser))
+
+	mux.HandleFunc(metricsEndpoint, cfg.HandlerMetrics)
+	mux.HandleFunc(resetMetricsEndpoint, cfg.mdwDevPlatformOnly(cfg.HandlerReset))
 
 	var httpServer http.Server
 	httpServer.Handler = mux

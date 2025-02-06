@@ -71,9 +71,9 @@ func (cfg *apiConfig)HandlerUpdateUser(rw http.ResponseWriter, req *http.Request
 		return
 	}
 	
-	userId, err := uuid.Parse(req.Header.Get(UseridFromJwtKey))
-	if err != nil {
-		log.Printf("error converting uuid %s", err)
+	userId, ok := req.Context().Value(UseridFromJwtKey).(uuid.UUID)
+	if !ok {
+		log.Printf("Error retrieveing userId from ctx\n")
 		ReturnJsonGenericInternalError(rw)
 		return
 	}
